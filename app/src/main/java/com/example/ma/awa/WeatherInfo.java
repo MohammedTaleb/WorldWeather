@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.net.http.SslError;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,7 +14,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import java.io.IOException;
 
@@ -34,8 +37,9 @@ public class WeatherInfo extends AppCompatActivity implements View.OnClickListen
 
 
 		mWebView= (WebView) findViewById(R.id.webv);
+		mWebView.setWebViewClient(new HelloWebViewClient());
 		mWebView.getSettings().setJavaScriptEnabled(true);
-		mWebView.loadUrl("https://map.worldweatheronline.com");
+		mWebView.loadUrl("http://map.worldweatheronline.com");
 
 
 
@@ -90,8 +94,8 @@ public class WeatherInfo extends AppCompatActivity implements View.OnClickListen
 			Log.i("Dialog", "is Online");
 			AlertDialog.Builder diolag;
 			diolag = new AlertDialog.Builder(this);
-			diolag.setTitle("Conncation ");
-			diolag.setMessage("Please check your Connication ");
+			diolag.setTitle("connection ");
+			diolag.setMessage("Please check your connection ");
 			diolag.setIcon(android.R.drawable.ic_dialog_alert);
 			diolag.setPositiveButton("Restart", new DialogInterface.OnClickListener() {
 				@Override
@@ -100,7 +104,7 @@ public class WeatherInfo extends AppCompatActivity implements View.OnClickListen
 					startActivity(intent);
 				}
 			});
-			diolag.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+			diolag.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					finish();
@@ -131,15 +135,20 @@ public class WeatherInfo extends AppCompatActivity implements View.OnClickListen
 	}
 
 
+	private class HelloWebViewClient extends WebViewClient {
+		private static final String TAG = "HelloWebViewClient";;
 
-
+		// Give application a chance to catch additional URL loading requests
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			Log.i(TAG, "About to load:" + url);
+			view.loadUrl(url);
+			return true;
+		}
+		@Override
+		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+			handler.proceed(); // Ignore SSL certificate errors
+		}
 	}
 
-
-
-
-
-
-
-
-
+	}
